@@ -2,12 +2,13 @@ from flask import Flask, jsonify, request
 from entities.student_entity import Student
 
 app = Flask(__name__)
-students_data_base = [Student("Petrov", 18), Student("Diabchyk", 19)]
+students_data_base = [Student("Petrov", 18), Student("Onyskiv", 19)]
+fileName = "students_data.txt"
 
 
 @app.route("/students", methods=["GET"])
 def get_students():
-    response_body = list(map(lambda std: {"full_name": std.full_name, "age": std.age}, students_data_base))
+    response_body = read_data_from_file()
     return jsonify(response_body)
 
 
@@ -27,8 +28,18 @@ def create_student():
     return jsonify(return_set)
 
 
+def read_data_from_file():
+    students_set = []
+    with open(fileName, "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            properties = line.replace("Name: ", "").replace(" Age: ", "").split(',')
+            students_set.append(Student(properties[0], properties[1]).to_json())
+    return students_set
+
+
 def write_all_entities_in_file(data_base, mode):
-    with open("students_data.txt", mode) as f:
+    with open(fileName, mode) as f:
         for student in data_base:
             f.write(student.to_string() + "\n")
 
